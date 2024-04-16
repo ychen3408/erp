@@ -9,8 +9,19 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
+<<<<<<< Updated upstream
 import shutil
+=======
+>>>>>>> Stashed changes
 
+def rename_downloaded_file(download_path, original_name, new_name):
+    """Wait for the download to finish and rename the file."""
+    # Wait for download to finish (simple implementation, consider using a more robust approach)
+    time.sleep(5)  # This is arbitrary; consider implementing a more robust method
+    file_path = os.path.join(download_path, original_name)
+    new_file_path = os.path.join(download_path, f"{new_name}_name.pdf")
+    os.rename(file_path, new_file_path)
+    print(f"Renamed downloaded file to {new_file_path}")
 
 def move_files_to_folder(download_path, folder_name):
     """Move all relevant files to the specified folder."""
