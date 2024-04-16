@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -8,7 +9,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-
 
 def crawl_information():
     download_path = r"C:\Users\Yixuan Gong\Downloads"
@@ -57,10 +57,14 @@ def crawl_information():
 
         # Continuously process until no more pages are available
         while True:
+            time.sleep(2)
+
+            # Initialize a set to keep track of clicked links
+            clicked_links = set()
+
             # Find and process each application link
-            applications = WebDriverWait(driver, 5).until(
-                EC.presence_of_all_elements_located(
-                    (By.CSS_SELECTOR, "a[href*='DetailedReport']")))
+            applications = wait.until(EC.presence_of_all_elements_located(
+                (By.CSS_SELECTOR, "a[href*='DetailedReport']")))
 
             # Filter out any applications where the 'href' attribute is null or empty
             filtered_applications = [app for app in applications if app.get_attribute('href') and app.is_displayed()]
@@ -69,68 +73,66 @@ def crawl_information():
             main_window = driver.current_window_handle
             all_windows_before_click = driver.window_handles
 
-            for app in applications:
-                app.click()
-                print(f"'{app.text}'")
-                time.sleep(2)
-                # Get new window handle and switch to it
-                new_windows = [window for window in driver.window_handles if window not in all_windows_before_click]
-                if new_windows:
-                    driver.switch_to.window(new_windows[0])
 
-                    # Now interact in the new window
-                    calculation_element = driver.find_elements(By.XPATH, "//*[starts-with(normalize-space(text()), 'Calculations - Design Plans')]")
-                    if (calculation_element):
-                        print('element found')
-                        ActionChains(driver).move_to_element(calculation_element[0]).click().perform()
-                        maps_elements = driver.find_elements(By.XPATH, "//*[starts-with(normalize-space(text()), 'Maps')]")
-                        if (maps_elements):
-                            print('maps_element found')
-                            ActionChains(driver).move_to_element(maps_elements[0]).click().perform()
-                            time.sleep(2)
-                        plans_elements = driver.find_elements(By.XPATH,
-                                                              "//*[starts-with(normalize-space(text()), 'Plans')]")
-                        if (plans_elements):
-                            print('plans_elements found')
-                            ActionChains(driver).move_to_element(plans_elements[0]).click().perform()
-                            time.sleep(2)
-                        # After clicking 'Maps and plans', find all <a> links that include 'docdownload' in their href attribute
-                        doc_links = driver.find_elements(By.XPATH,
-                                                         "//span[contains(@style, 'display: block;')]//a[contains(@href, 'docdownload')]")
-                        print(f"Found {len(doc_links)} document download link(s).")
+            for app in filtered_applications:
+                driver.execute_script("arguments[0].scrollIntoView(true);", app)
+                if (app.text not in clicked_links):
+                    app.click()
+                    print(f"'Handling Application# {app.text}'")
+                    clicked_links.add(app.text)
+                    time.sleep(2)
+                    # Get new window handle and switch to it
+                    new_windows = [window for window in driver.window_handles if window not in all_windows_before_click]
+                    if new_windows:
+                        driver.switch_to.window(new_windows[0])
 
-                        # Iterate through each found link and click
-                        for link in doc_links:
-                            print(f"Clicking on link: {link.get_attribute('href')}")
-                            # Ensure each link is in the viewport and then click
-                            driver.execute_script("arguments[0].scrollIntoView(true);", link)
-                            time.sleep(0.5)  # Small pause to ensure scrolling has completed
-                            link.click()  # Perform the click action
-                            time.sleep(2)  # Wait 2 seconds after each click
+                        # Now interact in the new window
+                        calculation_element = driver.find_elements(By.XPATH, "//*[starts-with(normalize-space(text()), 'Calculations - Design Plans')]")
+                        if (calculation_element):
+                            ActionChains(driver).move_to_element(calculation_element[0]).click().perform()
+                            maps_elements = driver.find_elements(By.XPATH, "//*[starts-with(normalize-space(text()), 'Maps')]")
+                            if (maps_elements):
+                                ActionChains(driver).move_to_element(maps_elements[0]).click().perform()
+                                time.sleep(2)
+                            plans_elements = driver.find_elements(By.XPATH,
+                                                                  "//*[starts-with(normalize-space(text()), 'Plans')]")
+                            if (plans_elements):
+                                ActionChains(driver).move_to_element(plans_elements[0]).click().perform()
+                                time.sleep(2)
 
-                    time.sleep(5)
-                    # Close the new window and switch back to the original window
-                    driver.close()
-                    driver.switch_to.window(main_window)
-                else:
-                    print("No new window opened")
+                            sealed_elements = driver.find_elements(By.XPATH,
+                                                                  "//*[starts-with(normalize-space(text()), 'Sealed Document Authentication')]")
+                            if (sealed_elements):
+                                ActionChains(driver).move_to_element(sealed_elements[0]).click().perform()
+                                time.sleep(2)
+                            # After clicking 'Maps and plans', find all <a> links that include 'docdownload' in their href attribute
+                            doc_links = driver.find_elements(By.XPATH,
+                                                             "//span[contains(@style, 'display: block;')]//a[contains(@href, 'docdownload')]")
+                            print(f"Found {len(doc_links)} document download link(s).")
+
+                            # Iterate through each found link and click
+                            for link in doc_links:
+                                # print(f"Clicking on link: {link.get_attribute('href')}")
+                                # Ensure each link is in the viewport and then click
+                                driver.execute_script("arguments[0].scrollIntoView(true);", link)
+                                time.sleep(0.5)  # Small pause to ensure scrolling has completed
+                                current_handles = driver.current_window_handle  # Existing window handles before click
+                                link.click()  # Perform the click action
+                                time.sleep(1)
+                                driver.switch_to.window(current_handles)
+                                time.sleep(5)  # Wait 5 seconds after each click
+
+                        time.sleep(5)
+                        # Close the new window and switch back to the original window
+                        driver.close()
+                        driver.switch_to.window(main_window)
+                    else:
+                        print("No new window opened")
                 time.sleep(1)  # Wait for folder contents to load
-
-                files = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.XPATH, '//a[contains(@href, "downloadLinkIdentifier")]')))
-                for file in files:
-                    file.click()
-                    time.sleep(1)  # Allow time for download to initiate
-
-                close_button = driver.find_element_by_xpath(
-                    '/html/body/table/tbody/tr[2]/td/table/tbody/tr[1]/td/table[5]/tbody/tr[3]/td/input')
-                close_button.click()
-                time.sleep(1)  # Wait for the main page to reload
-
-                # Check for and click the next page button if available
             try:
-                next_page = driver.find_element_by_xpath(
-                    '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/table[4]/tbody/tr[22]/td/table/tbody/tr/td[2]/a')
+                print("clicking next page")
+                next_page = driver.find_element(By.CSS_SELECTOR,
+                                               "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
                 next_page.click()
                 time.sleep(5)  # Wait for the next page of results to load
             except:
