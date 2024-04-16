@@ -80,10 +80,14 @@ def crawl_information():
                 time.sleep(5)  # Wait for the next page of results to load
             except:
                 print("No more pages to process.")
-                break  # Exit the loop if no next page button is found
+                break
 
-    driver.quit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-# Call the function from the main block
-    if __name__ == "__main__":
-        crawl_information()
+    finally:
+        driver.quit()
+        print("Driver closed.")
+
+if __name__ == "__main__":
+    crawl_information()
