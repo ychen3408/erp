@@ -108,7 +108,6 @@ def crawl_information():
                             link.click()  # Perform the click action
                             time.sleep(2)  # Wait 2 seconds after each click
 
-                    time.sleep(5)
                     # Close the new window and switch back to the original window
                     driver.close()
                     driver.switch_to.window(main_window)
@@ -116,21 +115,9 @@ def crawl_information():
                     print("No new window opened")
                 time.sleep(1)  # Wait for folder contents to load
 
-                files = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.XPATH, '//a[contains(@href, "downloadLinkIdentifier")]')))
-                for file in files:
-                    file.click()
-                    time.sleep(1)  # Allow time for download to initiate
-
-                close_button = driver.find_element_by_xpath(
-                    '/html/body/table/tbody/tr[2]/td/table/tbody/tr[1]/td/table[5]/tbody/tr[3]/td/input')
-                close_button.click()
-                time.sleep(1)  # Wait for the main page to reload
-
                 # Check for and click the next page button if available
             try:
-                next_page = driver.find_element_by_xpath(
-                    '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/table[4]/tbody/tr[22]/td/table/tbody/tr/td[2]/a')
+                next_page = driver.find_element_by_css_selector('a[href*="IterateReport.do?page=next"]')
                 next_page.click()
                 time.sleep(5)  # Wait for the next page of results to load
             except:
