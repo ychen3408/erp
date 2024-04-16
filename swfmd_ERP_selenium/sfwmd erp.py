@@ -8,7 +8,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import os
+import shutil
 
+
+def move_files_to_folder(download_path, folder_name):
+    """Move all relevant files to the specified folder."""
+    folder_path = os.path.join(download_path, folder_name)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    # Assuming all relevant files are PDFs, move them to the created folder
+    for file in os.listdir(download_path):
+        if file.endswith(".pdf"):
+            shutil.move(os.path.join(download_path, file), os.path.join(folder_path, file))
+    print(f"All relevant files moved to {folder_path}")
 
 def crawl_information():
     download_path = r"C:\Users\lily\Downloads"
