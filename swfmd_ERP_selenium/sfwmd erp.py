@@ -29,37 +29,33 @@ def crawl_information():
         Select(permit_type_select).select_by_visible_text('ERP')
         time.sleep(5)
         # Select From Date (January 1, 2024)
-        day_from_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                     '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td[2]/form/table/tbody/tr[16]/td[3]/select[1]')))
-        Select(day_from_select).select_by_visible_text('01')
+        day_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateDate")))
+        Select(day_from_select).select_by_value('01')
 
-        month_from_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                       '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[16]/td/3]/select[2]')))
-        Select(month_from_select).select_by_visible_text('01')
+        month_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateMonth")))
+        Select(month_from_select).select_by_visible_text('JAN')
 
-        year_from_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                      '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[16]/td/3]/select[3]')))
+        year_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateYear")))
         Select(year_from_select).select_by_visible_text('2024')
+        time.sleep(5)
 
         # Select To Date (April 15, 2024)
-        day_to_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                   '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[17]/td/3]/select[1]')))
+        day_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateDate")))
         Select(day_to_select).select_by_visible_text('15')
 
-        month_to_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                     '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[17]/td/3]/select[2]')))
-        Select(month_to_select).select_by_visible_text('04')
+        month_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateMonth")))
+        Select(month_to_select).select_by_visible_text('APR')
 
-        year_to_select = wait.until(EC.presence_of_element_located((By.XPATH,
-                                                                    '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[17]/td/3]/select[3]')))
+        year_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateYear")))
         Select(year_to_select).select_by_visible_text('2024')
+        time.sleep(5)
 
         # Click the Search button
-        search_button = wait.until(EC.element_to_be_clickable(
-            (By.XPATH, '/html/body/table/tbody/tr[3]/td/table/tbody/tr[1]/td/2]/form/table/tbody/tr[19]/td/input[1]')))
+        search_button = wait.until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="submit"][value="Search Records"]')))
         search_button.click()
-
-        time.sleep(5)  # Allow time for the search results to load
+        print("Search clicked")
+        time.sleep(10)  # Allow time for the search results to load
 
         # Continuously process until no more pages are available
         while True:
