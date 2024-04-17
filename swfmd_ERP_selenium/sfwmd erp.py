@@ -31,8 +31,32 @@ def move_files_to_folder(download_path, folder_name):
         if os.path.isfile(file_path):
             shutil.move(file_path, os.path.join(folder_path, file))
     print(f"All files moved to {folder_path}")
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
-
+def ensure_element_ready(driver, xpath, timeout=15):
+    """ Wait until the element is visible and has a size. """
+    try:
+        element = WebDriverWait(driver, timeout).until(
+            EC.visibility_of_element_located((By.XPATH, xpath))
+        )
+        # Additional check to make sure the element has height and width
+        return element if element.size['width'] > 0 and element.size['height'] > 0 else None
+    except TimeoutException:
+        print(f"Timeout waiting for the element: {xpath}")
+        return None
+def wait_for_file_download_completion(folder_path, timeout=600):
+    """Wait for all .crdownload files in the specified folder to disappear."""
+    start_time = time.time()
+    while True:
+        if all(not filename.endswith('.crdownload') for filename in os.listdir(folder_path)):
+            print("All files have finished downloading.")
+            break
+        elif (time.time() - start_time) > timeout:
+            print("Timeout reached while waiting for downloads to complete.")
+            break
+        time.sleep(1)  # Check every second
 def crawl_information():
     download_path = r"C:\Users\lily\Downloads"
     chrome_options = Options()
@@ -151,7 +175,7 @@ def crawl_information():
                                 driver.switch_to.window(current_handles)
                                 time.sleep(5)  # Wait 5 seconds after each click
 
-                        time.sleep(5)
+                        time.sleep(15)
                         # Move downloaded files to a new folder named after the application
                         move_files_to_folder(download_path, app_text)  # This is where you call the folder management
                         # Close the new window and switch back to the original window
@@ -165,7 +189,7 @@ def crawl_information():
                 next_page = driver.find_element(By.CSS_SELECTOR,
                                                "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
                 next_page.click()
-                time.sleep(5)  # Wait for the next page of results to load
+                time.sleep(20)  # Wait for the next page of results to load
             except:
                 print("No more pages to process.")
                 break
