@@ -150,17 +150,17 @@ def crawl_information():
                         if calculation_element:
                             ActionChains(driver).move_to_element(calculation_element[0]).click().perform()
                             maps_elements = driver.find_elements(By.XPATH,
-                                                                 "//*[starts-with(normalize-space(text()), 'Maps')]")
+                                                                 "//*[starts-with(normalize-space(text()), 'Maps(')]")
                             if maps_elements:
                                 driver.execute_script("arguments[0].scrollIntoView(true);", maps_elements[0])
                                 safe_click(driver, maps_elements[0])
                             plans_elements = driver.find_elements(By.XPATH,
-                                                                  "//*[starts-with(normalize-space(text()), 'Plans')]")
+                                                                  "//*[starts-with(normalize-space(text()), 'Plans(')]")
                             if plans_elements:
                                 driver.execute_script("arguments[0].scrollIntoView(true);", plans_elements[0])
                                 safe_click(driver, plans_elements[0])
                             sealed_elements = driver.find_elements(By.XPATH,
-                                                                   "//*[starts-with(normalize-space(text()), 'Sealed Document Authentication')]")
+                                                                   "//*[starts-with(normalize-space(text()), 'Sealed Document Authentication(')]")
                             if sealed_elements:
                                 driver.execute_script("arguments[0].scrollIntoView(true);", sealed_elements[0])
                                 safe_click(driver, sealed_elements[0])
