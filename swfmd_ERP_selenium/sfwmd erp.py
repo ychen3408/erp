@@ -1,5 +1,5 @@
 from selenium import webdriver
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -11,7 +11,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 import shutil
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 def ensure_folder_exists(folder_path):
     """Ensure the folder exists, and create it if it does not."""
@@ -23,42 +25,35 @@ def move_files_to_folder(download_path, folder_name):
     """Move all files from the download directory to a specified folder named after the application."""
     folder_path = os.path.join(download_path, folder_name)
     ensure_folder_exists(folder_path)
-
-    # Move all files in the download directory to the new folder
+    # Wait until there are no '.crdownload' files in the directory
+    while any(file.endswith('.crdownload') for file in os.listdir(download_path)):
+        print("Waiting for downloads to complete...")
+        time.sleep(5)  # Check every 5 seconds
+    # Move all completed download files in the directory to the new folder
     for file in os.listdir(download_path):
         file_path = os.path.join(download_path, file)
-        # Ensure the item is a file before attempting to move it
-        if os.path.isfile(file_path):
+        if os.path.isfile(file_path):  # Ensure the item is a file
             shutil.move(file_path, os.path.join(folder_path, file))
     print(f"All files moved to {folder_path}")
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
-def ensure_element_ready(driver, xpath, timeout=15):
-    """ Wait until the element is visible and has a size. """
-    try:
-        element = WebDriverWait(driver, timeout).until(
-            EC.visibility_of_element_located((By.XPATH, xpath))
-        )
-        # Additional check to make sure the element has height and width
-        return element if element.size['width'] > 0 and element.size['height'] > 0 else None
-    except TimeoutException:
-        print(f"Timeout waiting for the element: {xpath}")
-        return None
-def wait_for_file_download_completion(folder_path, timeout=600):
-    """Wait for all .crdownload files in the specified folder to disappear."""
-    start_time = time.time()
-    while True:
-        if all(not filename.endswith('.crdownload') for filename in os.listdir(folder_path)):
-            print("All files have finished downloading.")
-            break
-        elif (time.time() - start_time) > timeout:
-            print("Timeout reached while waiting for downloads to complete.")
-            break
-        time.sleep(1)  # Check every second
+def safe_click(driver, element, max_attempts=3, delay=1):
+    """Attempts to click on a given element up to max_attempts times with a delay between tries."""
+    attempts = 0
+    while attempts < max_attempts:
+        try:
+            # Scroll element into view
+            driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            # Attempt to click the element using ActionChains
+            ActionChains(driver).move_to_element(element).click().perform()
+            return True  # Click was successful
+        except WebDriverException as e:
+            print(f"Click failed on attempt {attempts + 1}: {str(e)}")
+            time.sleep(delay)  # Wait before retrying
+            attempts += 1
+    return False  # Failed to click after max_attempts
+
 def crawl_information():
-    download_path = r"C:\Users\lily\Downloads"
+    download_path = r"C:\Users\Yixuan Gong\Downloads"
     chrome_options = Options()
     chrome_options.add_experimental_option("prefs", {
         "download.default_directory": download_path,
@@ -75,6 +70,16 @@ def crawl_information():
         # Select Permit Type (ERP)
         permit_type_select = wait.until(EC.presence_of_element_located((By.NAME, "permitFamilyType")))
         Select(permit_type_select).select_by_visible_text('ERP')
+
+        ###############################TESTING ONLY DONT DELETE########################################################
+        # Find the input field for the Application Number
+        application_no_input = wait.until(EC.presence_of_element_located((By.NAME, "applicationNo")))
+        # Clear any existing value in the input field (optional but recommended)
+        application_no_input.clear()
+        # Input the specific application number '240411-43308'
+        application_no_input.send_keys('240411-43308')
+        ###############################TESTING ONLY DONT DELETE#####################################################
+
         # Select From Date (January 1, 2024)
         day_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateDate")))
         Select(day_from_select).select_by_value('01')
@@ -147,19 +152,18 @@ def crawl_information():
                             maps_elements = driver.find_elements(By.XPATH,
                                                                  "//*[starts-with(normalize-space(text()), 'Maps')]")
                             if maps_elements:
-                                ActionChains(driver).move_to_element(maps_elements[0]).click().perform()
-                                time.sleep(2)
+                                driver.execute_script("arguments[0].scrollIntoView(true);", maps_elements[0])
+                                safe_click(driver, maps_elements[0])
                             plans_elements = driver.find_elements(By.XPATH,
                                                                   "//*[starts-with(normalize-space(text()), 'Plans')]")
                             if plans_elements:
-                                ActionChains(driver).move_to_element(plans_elements[0]).click().perform()
-                                time.sleep(2)
-
+                                driver.execute_script("arguments[0].scrollIntoView(true);", plans_elements[0])
+                                safe_click(driver, plans_elements[0])
                             sealed_elements = driver.find_elements(By.XPATH,
                                                                    "//*[starts-with(normalize-space(text()), 'Sealed Document Authentication')]")
                             if sealed_elements:
-                                ActionChains(driver).move_to_element(sealed_elements[0]).click().perform()
-                                time.sleep(2)
+                                driver.execute_script("arguments[0].scrollIntoView(true);", sealed_elements[0])
+                                safe_click(driver, sealed_elements[0])
                             # After clicking 'Maps and plans', find all <a> links that include 'docdownload' in their href attribute
                             doc_links = driver.find_elements(By.XPATH,
                                                              "//span[contains(@style, 'display: block;')]//a[contains(@href, 'docdownload')]")
@@ -173,9 +177,9 @@ def crawl_information():
                                 link.click()  # Perform the click action
                                 time.sleep(1)
                                 driver.switch_to.window(current_handles)
-                                time.sleep(5)  # Wait 5 seconds after each click
+                                time.sleep(2)  # Wait 5 seconds after each click
 
-                        time.sleep(15)
+                        time.sleep(1)
                         # Move downloaded files to a new folder named after the application
                         move_files_to_folder(download_path, app_text)  # This is where you call the folder management
                         # Close the new window and switch back to the original window
