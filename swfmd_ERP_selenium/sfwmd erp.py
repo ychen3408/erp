@@ -72,12 +72,12 @@ def crawl_information():
         Select(permit_type_select).select_by_visible_text('ERP')
 
         ###############################TESTING ONLY DONT DELETE########################################################
-        # Find the input field for the Application Number
-        application_no_input = wait.until(EC.presence_of_element_located((By.NAME, "applicationNo")))
-        # Clear any existing value in the input field (optional but recommended)
-        application_no_input.clear()
-        # Input the specific application number '240411-43308'
-        application_no_input.send_keys('240411-43308')
+        # # Find the input field for the Application Number
+        # application_no_input = wait.until(EC.presence_of_element_located((By.NAME, "applicationNo")))
+        # # Clear any existing value in the input field (optional but recommended)
+        # application_no_input.clear()
+        # # Input the specific application number '240411-43308'
+        # application_no_input.send_keys('240411-43308')
         ###############################TESTING ONLY DONT DELETE#####################################################
 
         # Select From Date (January 1, 2024)
