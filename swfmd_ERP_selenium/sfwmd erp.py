@@ -14,6 +14,7 @@ import shutil
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import re  # Import regular expression module
 
 def ensure_folder_exists(folder_path):
     """Ensure the folder exists, and create it if it does not."""
@@ -93,10 +94,10 @@ def crawl_information():
 
         # Select To Date (April 15, 2024)
         day_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateDate")))
-        Select(day_to_select).select_by_visible_text('15')
+        Select(day_to_select).select_by_visible_text('01')
 
         month_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateMonth")))
-        Select(month_to_select).select_by_visible_text('APR')
+        Select(month_to_select).select_by_visible_text('MAR')
 
         year_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateYear")))
         Select(year_to_select).select_by_visible_text('2024')
@@ -115,37 +116,37 @@ def crawl_information():
             # Initialize a set to keep track of clicked links
             clicked_links = set()
             pages = wait.until(EC.presence_of_all_elements_located(
-                (By.XPATH, "//td[@align='center']/strong[contains(text(), 'of 1000')]")))
+                (By.XPATH, "//td[@align='center']/strong[contains(text(), 'of 760')]")))
             if (pages):
                 print('Current page: ' + pages[0].text)
             ####################################################翻页功能，仅在代码中断时使用#####################################################################
-            while True:
-                if not checked_for_specific_page:
-                    while True:
-                        try:
-                            WebDriverWait(driver, 2).until(
-                                EC.presence_of_element_located(
-                                    (By.XPATH, "//td[@align='center']/strong[text()='4 to 6 of 1000']")))
-                            print("Found the element with text '4 to 6 of 1000'.")
-                            checked_for_specific_page = True
-                            break
-                        except TimeoutException:
-                            print("Text '4 to 6 of 1000' not found on this page. Clicking next page.")
-                            try:
-                                next_page = driver.find_element(By.CSS_SELECTOR,
-                                                                "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
-                                next_page.click()
-                                print("Clicked next page. Waiting for page to load.")
-                            except NoSuchElementException:
-                                print("No more pages to process.")
-                                break
-                        except Exception as e:
-                            print(f"An error occurred: {e}")
-                            break
-                    if checked_for_specific_page:
-                        break
-                if checked_for_specific_page:
-                    break
+            # while True:
+            #     if not checked_for_specific_page:
+            #         while True:
+            #             try:
+            #                 WebDriverWait(driver, 2).until(
+            #                     EC.presence_of_element_located(
+                #                         (By.XPATH, "//td[@align='center']/strong[text()='4 to 6 of 760']")))
+            #                 print("Found the element with text '4 to 6 of 760'.")
+            #                 checked_for_specific_page = True
+            #                 break
+            #             except TimeoutException:
+            #                 print("Text '4 to 6 of 760' not found on this page. Clicking next page.")
+            #                 try:
+            #                     next_page = driver.find_element(By.CSS_SELECTOR,
+            #                                                     "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
+            #                     next_page.click()
+            #                     print("Clicked next page. Waiting for page to load.")
+            #                 except NoSuchElementException:
+            #                     print("No more pages to process.")
+            #                     break
+            #             except Exception as e:
+            #                 print(f"An error occurred: {e}")
+            #                 break
+            #         if checked_for_specific_page:
+            #             break
+            #     if checked_for_specific_page:
+            #         break
             #########################################################################################################################
 
             # Find and process each application link
@@ -153,7 +154,7 @@ def crawl_information():
                 (By.CSS_SELECTOR, "a[href*='DetailedReport']")))
 
             # Filter out any applications where the 'href' attribute is null or empty
-            filtered_applications = [app for app in applications if app.get_attribute('href') and app.is_displayed()]
+            filtered_applications = [app for app in applications if app.get_attribute('href')  and re.match(r'^\d+(-\d+)*$', app.text) and app.is_displayed()]
 
             # Capture current window handle before the click
             main_window = driver.current_window_handle
