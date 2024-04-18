@@ -79,7 +79,7 @@ def crawl_information():
         # # Clear any existing value in the input field (optional but recommended)
         # application_no_input.clear()
         # # Input the specific application number '240411-43308'
-        # application_no_input.send_keys('240404-43208')
+        # application_no_input.send_keys('220920-36007')
         ###############################TESTING ONLY DONT DELETE#####################################################
 
         # Select From Date (January 1, 2024)
@@ -120,33 +120,33 @@ def crawl_information():
             if (pages):
                 print('Current page: ' + pages[0].text)
             ####################################################翻页功能，仅在代码中断时使用#####################################################################
-            # while True:
-            #     if not checked_for_specific_page:
-            #         while True:
-            #             try:
-            #                 WebDriverWait(driver, 2).until(
-            #                     EC.presence_of_element_located(
-                #                         (By.XPATH, "//td[@align='center']/strong[text()='4 to 6 of 760']")))
-            #                 print("Found the element with text '4 to 6 of 760'.")
-            #                 checked_for_specific_page = True
-            #                 break
-            #             except TimeoutException:
-            #                 print("Text '4 to 6 of 760' not found on this page. Clicking next page.")
-            #                 try:
-            #                     next_page = driver.find_element(By.CSS_SELECTOR,
-            #                                                     "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
-            #                     next_page.click()
-            #                     print("Clicked next page. Waiting for page to load.")
-            #                 except NoSuchElementException:
-            #                     print("No more pages to process.")
-            #                     break
-            #             except Exception as e:
-            #                 print(f"An error occurred: {e}")
-            #                 break
-            #         if checked_for_specific_page:
-            #             break
-            #     if checked_for_specific_page:
-            #         break
+            while True:
+                if not checked_for_specific_page:
+                    while True:
+                        try:
+                            WebDriverWait(driver, 2).until(
+                                EC.presence_of_element_located(
+                                        (By.XPATH, "//td[@align='center']/strong[text()='754 to 756 of 760']")))
+                            print("Found the element with text '754 to 756 of 760'.")
+                            checked_for_specific_page = True
+                            break
+                        except TimeoutException:
+                            print("Text '754 to 756 of 760' not found on this page. Clicking next page.")
+                            try:
+                                next_page = driver.find_element(By.CSS_SELECTOR,
+                                                                "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
+                                next_page.click()
+                                print("Clicked next page. Waiting for page to load.")
+                            except NoSuchElementException:
+                                print("No more pages to process.")
+                                break
+                        except Exception as e:
+                            print(f"An error occurred: {e}")
+                            break
+                    if checked_for_specific_page:
+                        break
+                if checked_for_specific_page:
+                    break
             #########################################################################################################################
 
             # Find and process each application link
@@ -199,6 +199,11 @@ def crawl_information():
                             if sealed_elements:
                                 driver.execute_script("arguments[0].scrollIntoView(true);", sealed_elements[0])
                                 safe_click(driver, sealed_elements[0])
+                            reports_elements = driver.find_elements(By.XPATH,
+                                                                  "//*[starts-with(normalize-space(text()), 'Reports(')]")
+                            if reports_elements:
+                                driver.execute_script("arguments[0].scrollIntoView(true);", reports_elements[0])
+                                safe_click(driver, reports_elements[0])
                             # After clicking 'Maps and plans', find all <a> links that include 'docdownload' in their href attribute
                             doc_links = driver.find_elements(By.XPATH,
                                                              "//span[contains(@style, 'display: block;')]//a[contains(@href, 'docdownload')]")
