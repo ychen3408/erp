@@ -84,20 +84,20 @@ def crawl_information():
 
         # Select From Date (January 1, 2024)
         day_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateDate")))
-        Select(day_from_select).select_by_value('01')
+        Select(day_from_select).select_by_value('02')
 
         month_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateMonth")))
-        Select(month_from_select).select_by_visible_text('JAN')
+        Select(month_from_select).select_by_visible_text('MAR')
 
         year_from_select = wait.until(EC.presence_of_element_located((By.NAME, "fromdateYear")))
         Select(year_from_select).select_by_visible_text('2024')
 
         # Select To Date (April 15, 2024)
         day_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateDate")))
-        Select(day_to_select).select_by_visible_text('01')
+        Select(day_to_select).select_by_visible_text('18')
 
         month_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateMonth")))
-        Select(month_to_select).select_by_visible_text('MAR')
+        Select(month_to_select).select_by_visible_text('APR')
 
         year_to_select = wait.until(EC.presence_of_element_located((By.NAME, "todateYear")))
         Select(year_to_select).select_by_visible_text('2024')
@@ -116,37 +116,37 @@ def crawl_information():
             # Initialize a set to keep track of clicked links
             clicked_links = set()
             pages = wait.until(EC.presence_of_all_elements_located(
-                (By.XPATH, "//td[@align='center']/strong[contains(text(), 'of 760')]")))
+                (By.XPATH, "//td[@align='center']/strong[contains(text(), 'of 677')]")))
             if (pages):
                 print('Current page: ' + pages[0].text)
             ####################################################翻页功能，仅在代码中断时使用#####################################################################
-            while True:
-                if not checked_for_specific_page:
-                    while True:
-                        try:
-                            WebDriverWait(driver, 2).until(
-                                EC.presence_of_element_located(
-                                        (By.XPATH, "//td[@align='center']/strong[text()='754 to 756 of 760']")))
-                            print("Found the element with text '754 to 756 of 760'.")
-                            checked_for_specific_page = True
-                            break
-                        except TimeoutException:
-                            print("Text '754 to 756 of 760' not found on this page. Clicking next page.")
-                            try:
-                                next_page = driver.find_element(By.CSS_SELECTOR,
-                                                                "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
-                                next_page.click()
-                                print("Clicked next page. Waiting for page to load.")
-                            except NoSuchElementException:
-                                print("No more pages to process.")
-                                break
-                        except Exception as e:
-                            print(f"An error occurred: {e}")
-                            break
-                    if checked_for_specific_page:
-                        break
-                if checked_for_specific_page:
-                    break
+            # while True:
+            #     if not checked_for_specific_page:
+            #         while True:
+            #             try:
+            #                 WebDriverWait(driver, 2).until(
+            #                     EC.presence_of_element_located(
+            #                             (By.XPATH, "//td[@align='center']/strong[text()='754 to 756 of 760']")))
+            #                 print("Found the element with text '754 to 756 of 760'.")
+            #                 checked_for_specific_page = True
+            #                 break
+            #             except TimeoutException:
+            #                 print("Text '754 to 756 of 760' not found on this page. Clicking next page.")
+            #                 try:
+            #                     next_page = driver.find_element(By.CSS_SELECTOR,
+            #                                                     "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
+            #                     next_page.click()
+            #                     print("Clicked next page. Waiting for page to load.")
+            #                 except NoSuchElementException:
+            #                     print("No more pages to process.")
+            #                     break
+            #             except Exception as e:
+            #                 print(f"An error occurred: {e}")
+            #                 break
+            #         if checked_for_specific_page:
+            #             break
+            #     if checked_for_specific_page:
+            #         break
             #########################################################################################################################
 
             # Find and process each application link
@@ -233,7 +233,7 @@ def crawl_information():
                 next_page = driver.find_element(By.CSS_SELECTOR,
                                                "a[href*='IterateReport.do?page=next'] img[src*='nextcal.gif']")
                 next_page.click()
-                time.sleep(20)  # Wait for the next page of results to load
+                time.sleep(2)  # Wait for the next page of results to load
             except:
                 print("No more pages to process.")
                 break
